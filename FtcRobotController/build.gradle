@@ -5,6 +5,9 @@ import java.text.SimpleDateFormat
 //
 apply plugin: 'com.android.library'
 
+def Properties properties = new Properties()
+properties.load(project.rootProject.file("local.properties").newDataInputStream())
+
 android {
 
     defaultConfig {
@@ -27,7 +30,14 @@ android {
 
 repositories {
     maven { url = 'https://dl.bintray.com/first-tech-challenge/ftcsdk/' }
-    maven { url = 'https://git.arct.io/api/v4/projects/35/packages/maven' }
+    maven {
+        url = 'https://maven.pkg.github.com/techno-dynamics/rl'
+
+        credentials {
+            username = properties.getProperty('publish.user') ?: System.getenv("USERNAME")
+            password = properties.getProperty('publish.key') ?: System.getenv("TOKEN")
+        }
+    }
 }
 
 apply from: 'build.release.gradle'
