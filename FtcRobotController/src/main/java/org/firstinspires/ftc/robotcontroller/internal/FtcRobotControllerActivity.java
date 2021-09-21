@@ -756,7 +756,7 @@ public class FtcRobotControllerActivity extends Activity
   }
 
   protected OpModeRegister createOpModeRegister() {
-    return new FtcOpModeRegister();
+    return new FtcOpModeRegister(this);
   }
 
   private void shutdownRobot() {

@@ -19,5 +19,9 @@ dependencies {
     implementation 'org.tensorflow:tensorflow-lite-task-vision:0.2.0'
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'org.firstinspires.ftc:gameAssets-FreightFrenzy:1.0.0'
-}
 
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.30'
+    implementation 'org.jetbrains.kotlin:kotlin-reflect:1.5.30'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2'
+}

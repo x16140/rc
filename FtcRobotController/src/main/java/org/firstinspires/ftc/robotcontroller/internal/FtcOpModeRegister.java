@@ -31,16 +31,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package org.firstinspires.ftc.robotcontroller.internal;
 
+import android.app.Activity;
+import android.os.Environment;
+
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegister;
 
 import org.firstinspires.ftc.robotcontroller.external.samples.ConceptNullOp;
+import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
+
+import java.lang.reflect.InvocationTargetException;
+
+import dalvik.system.DexClassLoader;
 
 /**
  * {@link FtcOpModeRegister} is responsible for registering opmodes for use in an FTC game.
  * @see #register(OpModeManager)
  */
 public class FtcOpModeRegister implements OpModeRegister {
+
+    private final Activity activity;
+
+    public FtcOpModeRegister(Activity activity) {
+        this.activity = activity;
+    }
 
     /**
      * {@link #register(OpModeManager)} is called by the SDK game in order to register
@@ -62,9 +77,50 @@ public class FtcOpModeRegister implements OpModeRegister {
      * @see com.qualcomm.robotcore.eventloop.opmode.Autonomous
      */
     public void register(OpModeManager manager) {
-
         /**
          * Any manual OpMode class registrations should go here.
          */
+
+        final String path = Environment.getExternalStorageDirectory() + "/programs.dex";
+        final ClassLoader loader = new DexClassLoader(
+            path,
+            activity.getDir("outdex", 0).getAbsolutePath(),
+            null,
+            activity.getClassLoader()
+        );
+
+        try {
+            final Class<Object> manifest = (Class<Object>)loader.loadClass("io.arct.manifest.ManifestKt");
+            final Object[] programs = (Object[])manifest.getMethod("getPrograms").invoke(null);
+
+            for (Object entry : programs) {
+                Class<? extends Object> c = entry.getClass();
+
+                String programName = (String)c.getField("program").get(entry);
+                String name = (String)c.getField("name").get(entry);
+                String group = (String)c.getField("group").get(entry);
+                int type = (int)c.getField("type").get(entry);
+
+                Class<? extends OpMode> program = (Class<? extends OpMode>)loader.loadClass(programName);
+
+                if (type == 2)
+                    continue;
+
+                OpModeMeta.Flavor flavor =
+                    type == 0 ? OpModeMeta.Flavor.AUTONOMOUS :
+                    type == 1 ? OpModeMeta.Flavor.TELEOP :
+                    null;
+
+                manager.register(new OpModeMeta.Builder()
+                    .setFlavor(flavor)
+                    .setName(name)
+                    .setGroup(group)
+                    .build(),
+                    program
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
