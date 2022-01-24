@@ -33,6 +33,7 @@ package org.firstinspires.ftc.robotcontroller.internal;
 
 import android.app.Activity;
 import android.os.Environment;
+import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
@@ -90,7 +91,7 @@ public class FtcOpModeRegister implements OpModeRegister {
         );
 
         try {
-            final Class<Object> manifest = (Class<Object>)loader.loadClass("io.arct.manifest.ManifestKt");
+            final Class<Object> manifest = (Class<Object>)loader.loadClass("com.aercie.manifest.ManifestKt");
             final Object[] programs = (Object[])manifest.getMethod("getPrograms").invoke(null);
 
             for (Object entry : programs) {
