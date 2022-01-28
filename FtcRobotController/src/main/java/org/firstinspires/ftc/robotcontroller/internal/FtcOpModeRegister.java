@@ -82,6 +82,8 @@ public class FtcOpModeRegister implements OpModeRegister {
          * Any manual OpMode class registrations should go here.
          */
 
+        Log.i("DynLoad", "Preparing to load programs");
+
         final String path = Environment.getExternalStorageDirectory() + "/programs.dex";
         final ClassLoader loader = new DexClassLoader(
             path,
@@ -90,10 +92,16 @@ public class FtcOpModeRegister implements OpModeRegister {
             activity.getClassLoader()
         );
 
+        Log.i("DynLoad", "ClassLoader initialized");
+
         try {
             final Class<Object> manifest = (Class<Object>)loader.loadClass("com.aercie.manifest.ManifestKt");
-            final Object[] programs = (Object[])manifest.getMethod("getPrograms").invoke(null);
+            Log.i("DynLoad", "Manifest loaded");
 
+            final Object[] programs = (Object[])manifest.getMethod("getPrograms").invoke(null);
+            Log.i("DynLoad", "Manifest retrieved");
+
+            Log.i("DynLoad", "Loading " + programs.length + " programs.");
             for (Object entry : programs) {
                 Class<? extends Object> c = entry.getClass();
 
@@ -101,8 +109,10 @@ public class FtcOpModeRegister implements OpModeRegister {
                 String name = (String)c.getField("name").get(entry);
                 String group = (String)c.getField("group").get(entry);
                 int type = (int)c.getField("type").get(entry);
+                Log.i("DynLoad", "Retrieved program entry: " + programName + " (" + name + ")");
 
                 Class<? extends OpMode> program = (Class<? extends OpMode>)loader.loadClass(programName);
+                Log.i("DynLoad", "Program loaded");
 
                 if (type == 2)
                     continue;
@@ -119,9 +129,12 @@ public class FtcOpModeRegister implements OpModeRegister {
                     .build(),
                     program
                 );
+
+                Log.i("DynLoad", "Program " + programName + " has been successfully registered");
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Log.e("DynLoad", "DynLoad has encountered an error!");
         }
     }
 }
